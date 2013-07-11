@@ -1,0 +1,6 @@
+__init__.py
+auth.py
+credentials.dat
+data/
+
+*.pyc

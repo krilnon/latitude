@@ -19,11 +19,14 @@ from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import run
+import simplejson as json
+import pymongo
+from pymongo import MongoClient
 
 
-client_id = '[paste your client id here]'
-client_secret = '[paste your client secret here]'
-ROOT = '[path to directory to store data in]'
+from auth import client_id, client_secret
+
+ROOT = './data/'
 numBlocks = 100 #will give you 100,000 most recent data points from user history
 
 # The scope URL for read/write access to a user's calendar data
@@ -70,6 +73,10 @@ def main(argv):
   #   version of the API you are using ('v3')
   #   authorized httplib2.Http() object that can be used for API calls
   service = build('latitude', 'v1', http=http) #
+  
+  client = MongoClient()
+  db = client.latitude
+  locations = db.locations
 
   try:
     earliestTs = '9999999999999' #max ts (i.e., start at most recent readings)
@@ -80,7 +87,12 @@ def main(argv):
     while len(history)<numBlocks and 'items' in data and len(data['items'])>1:
         history.append(data['items'])
         #retrieve earliest timestamp in this batch, so that we can go back even further in next batch
-        print data
+        print json.dumps(data['items'])
+        
+        for i in range(len(data['items']) - 1, -1, -1):
+            item = data['items'][i]
+            locations.insert(item)
+        
         earliestTs = int(history[-1][-1]['timestampMs'])
         print 'earliestTs',earliestTs
         print '%i blocks retrieved, going back as far as %i (time)'%(len(history), earliestTs)
