@@ -27,7 +27,7 @@ from pymongo import MongoClient
 from auth import client_id, client_secret
 
 ROOT = './data/'
-numBlocks = 100 #will give you 100,000 most recent data points from user history
+numBlocks = 1000 #will give you 100,000 most recent data points from user history
 
 # The scope URL for read/write access to a user's calendar data
 scope='https://www.googleapis.com/auth/latitude.all.best'
@@ -76,7 +76,7 @@ def main(argv):
   
   client = MongoClient()
   db = client.latitude
-  locations = db.locations
+  locations = db.locationsFull
 
   try:
     earliestTs = '9999999999999' #max ts (i.e., start at most recent readings)
